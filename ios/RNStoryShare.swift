@@ -18,8 +18,8 @@ class RNStoryShare: NSObject{
 
     let UNKNOWN_ERROR: String = "An unknown error occured in RNStoryShare"
 
-    let instagramScheme = URL(fileURLWithPath: "instagram-stories://share")
-    let snapchatScheme = URL(fileURLWithPath: "snapchat://")
+    let instagramScheme = URL(string: "instagram-stories://share")
+    let snapchatScheme = URL(string: "snapchat://")
     
     @objc
     func constantsToExport() -> [String: Any]! {
@@ -66,7 +66,11 @@ class RNStoryShare: NSObject{
                 pasteboardItems["com.instagram.sharedSticker.contentURL"] = attributionLink
                 
                 UIPasteboard.general.items = [pasteboardItems]
-                UIApplication.shared.openURL(instagramScheme)
+                if #available(iOS 10.0, *) {
+                    UIApplication.shared.open(instagramScheme)
+                } else {
+                    UIApplication.shared.openURL(instagramScheme)
+                }
                 resolve("ok")
                 
             } else {
