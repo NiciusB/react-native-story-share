@@ -1,7 +1,7 @@
 {
   "name": "react-native-story-share",
-  "version": "0.5.0",
-  "description": "share your images to instagram and snapchat stories",
+  "version": "1.0.0",
+  "description": "Share your images to Instagram and Snapchat stories",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,7 @@
     "story",
     "share"
   ],
-  "author": "Johannes Sorg <johannes@sorg.me>",
+  "author": "NiciusB <nuno@balbona.me>",
   "license": "MIT",
   "peerDependencies": {
     "react-native": ">=0.60.0"

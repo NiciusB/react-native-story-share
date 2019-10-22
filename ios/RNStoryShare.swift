@@ -18,8 +18,8 @@ class RNStoryShare: NSObject{
 
     let UNKNOWN_ERROR: String = "An unknown error occured in RNStoryShare"
 
-    let instagramScheme = URL(string: "instagram-stories://share")
-    let snapchatScheme = URL(string: "snapchat://")
+    let instagramScheme = URL(fileURLWithPath: "instagram-stories://share")
+    let snapchatScheme = URL(fileURLWithPath: "snapchat://")
     
     @objc
     func constantsToExport() -> [String: Any]! {
@@ -32,13 +32,13 @@ class RNStoryShare: NSObject{
     @objc
     func isInstagramAvailable(_ resolve: RCTPromiseResolveBlock,
                               rejecter reject: RCTPromiseRejectBlock) -> Void {
-        resolve(UIApplication.shared.canOpenURL(instagramScheme!))
+        resolve(UIApplication.shared.canOpenURL(instagramScheme))
     }
     
     @objc
     func isSnapchatAvailable(_ resolve: RCTPromiseResolveBlock,
                              rejecter reject: RCTPromiseRejectBlock) -> Void {
-        resolve(UIApplication.shared.canOpenURL(snapchatScheme!))
+        resolve(UIApplication.shared.canOpenURL(snapchatScheme))
     }
     
     func _shareToInstagram(_ backgroundData: NSData? = nil,
@@ -49,7 +49,7 @@ class RNStoryShare: NSObject{
                            resolve: RCTPromiseResolveBlock,
                            reject: RCTPromiseRejectBlock){
         do{
-            if(UIApplication.shared.canOpenURL(instagramScheme!)){
+            if(UIApplication.shared.canOpenURL(instagramScheme)){
                 
                 var pasteboardItems: Dictionary<String, Any> = [:]
                 
@@ -66,7 +66,7 @@ class RNStoryShare: NSObject{
                 pasteboardItems["com.instagram.sharedSticker.contentURL"] = attributionLink
                 
                 UIPasteboard.general.items = [pasteboardItems]
-                UIApplication.shared.openURL(instagramScheme!)
+                UIApplication.shared.openURL(instagramScheme)
                 resolve("ok")
                 
             } else {
@@ -155,10 +155,10 @@ class RNStoryShare: NSObject{
                 snap.sticker = sticker
             }
 
-            let snapAPI = SCSDKSnapAPI(content: snap)
-            snapAPI.startSnapping {(error: Error?) in
+            let snapAPI = SCSDKSnapAPI()
+            snapAPI.startSending(snap, completionHandler: { (error) in
                 resolve("ok")
-            }
+            })
         } catch {
             reject(domain, error.localizedDescription, error)
         }
