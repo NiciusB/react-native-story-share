@@ -20,6 +20,12 @@ class RNStoryShare: NSObject{
 
     let instagramScheme = URL(string: "instagram-stories://share")
     let snapchatScheme = URL(string: "snapchat://")
+
+    var snapAPI: SCSDKSnapAPI?
+
+    override init() {
+        snapAPI = SCSDKSnapAPI()
+    }
     
     @objc
     func constantsToExport() -> [String: Any]! {
@@ -32,13 +38,13 @@ class RNStoryShare: NSObject{
     @objc
     func isInstagramAvailable(_ resolve: RCTPromiseResolveBlock,
                               rejecter reject: RCTPromiseRejectBlock) -> Void {
-        resolve(UIApplication.shared.canOpenURL(instagramScheme))
+        resolve(UIApplication.shared.canOpenURL(instagramScheme!))
     }
     
     @objc
     func isSnapchatAvailable(_ resolve: RCTPromiseResolveBlock,
                              rejecter reject: RCTPromiseRejectBlock) -> Void {
-        resolve(UIApplication.shared.canOpenURL(snapchatScheme))
+        resolve(UIApplication.shared.canOpenURL(snapchatScheme!))
     }
     
     func _shareToInstagram(_ backgroundData: NSData? = nil,
@@ -49,7 +55,7 @@ class RNStoryShare: NSObject{
                            resolve: RCTPromiseResolveBlock,
                            reject: RCTPromiseRejectBlock){
         do{
-            if(UIApplication.shared.canOpenURL(instagramScheme)){
+            if(UIApplication.shared.canOpenURL(instagramScheme!)){
                 
                 var pasteboardItems: Dictionary<String, Any> = [:]
                 
@@ -67,9 +73,9 @@ class RNStoryShare: NSObject{
                 
                 UIPasteboard.general.items = [pasteboardItems]
                 if #available(iOS 10.0, *) {
-                    UIApplication.shared.open(instagramScheme)
+                    UIApplication.shared.open(instagramScheme!)
                 } else {
-                    UIApplication.shared.openURL(instagramScheme)
+                    UIApplication.shared.openURL(instagramScheme!)
                 }
                 resolve("ok")
                 
@@ -136,7 +142,7 @@ class RNStoryShare: NSObject{
                               attributionLink: String,
                               type: String,
                               resolve: @escaping RCTPromiseResolveBlock,
-                              reject: RCTPromiseRejectBlock)
+                              reject: @escaping RCTPromiseRejectBlock)
     {
         do {
             if(attributionLink != ""){
@@ -159,10 +165,13 @@ class RNStoryShare: NSObject{
                 snap.sticker = sticker
             }
 
-            let snapAPI = SCSDKSnapAPI()
-            snapAPI.startSending(snap, completionHandler: { (error) in
-                resolve("ok")
-            })
+            snapAPI?.startSending(snap) { (error: Error?) in
+                if (error != nil) {
+                    reject("Error", "Unknown SnapKit error", error!)
+                } else {
+                    resolve("ok");
+                }
+            }
         } catch {
             reject(domain, error.localizedDescription, error)
         }
@@ -171,7 +180,7 @@ class RNStoryShare: NSObject{
     @objc
     func shareToSnapchat(_ config: NSDictionary,
                          resolver resolve: @escaping RCTPromiseResolveBlock,
-                          rejecter reject: RCTPromiseRejectBlock) -> Void {
+                          rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             if (config["backgroundAsset"] == nil && config["stickerAsset"] == nil){
                 let error = NSError(domain: domain, code: 400, userInfo: ["Error": "Background Asset and Sticker Asset are nil"])
@@ -203,7 +212,7 @@ class RNStoryShare: NSObject{
                 snap = SCSDKNoSnapContent()
             }
             
-            _shareToSnapchat(snap,stickerAsset: stickerAsset, attributionLink: attributionLink, type: type, resolve: resolve, reject: reject)
+            _shareToSnapchat(snap, stickerAsset: stickerAsset, attributionLink: attributionLink, type: type, resolve: resolve, reject: reject)
         } catch {
             reject(domain, error.localizedDescription, error)
         }
